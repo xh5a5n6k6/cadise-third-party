@@ -1,0 +1,8 @@
+[submodule "stb"]
+	path = stb
+	url = https://github.com/xh5a5n6k6/stb
+	branch = cadise
+[submodule "StackWalker"]
+	path = StackWalker
+	url = https://github.com/xh5a5n6k6/StackWalker
+	branch = cadise
