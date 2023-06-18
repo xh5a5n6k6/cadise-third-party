@@ -37,7 +37,7 @@ endif()
 
 # Set OS-dependent install directory.
 set(THIRD_PARTY_INSTALL_DIR 
-    "${PROJECT_BINARY_DIR}/Prebuilt/${BUILD_OS_TYPE}/${CMAKE_BUILD_TYPE}/ThirdParty/")
+    "${PROJECT_BINARY_DIR}/Prebuilt/ThirdParty/${BUILD_OS_TYPE}/${CMAKE_BUILD_TYPE}/")
 
 # Use C++20 to build all libraries.
 set(CMAKE_CXX_STANDARD          20)
