@@ -19,13 +19,25 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(BUILD_OS_TYPE "macOS")
 else()
-    message(FATAL_ERROR
-        "Unknown OS type: ${CMAKE_SYSTEM_NAME}")
+    message(WARNING
+        "Unknown OS type: ${CMAKE_SYSTEM_NAME}, fallback to Linux instead.")
+
+    set(BUILD_OS_TYPE "Linux")
+endif()
+
+# Set the available configuration types. (Release is only supported)
+set(CMAKE_CONFIGURATION_TYPES "Release;" CACHE
+    STRING "List of build configurations (Release is the only supported type)."
+    FORCE)
+
+# Explicitly set build type to Release.
+if(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(CMAKE_BUILD_TYPE "Release")
 endif()
 
 # Set OS-dependent install directory.
 set(THIRD_PARTY_INSTALL_DIR 
-    "${PROJECT_BINARY_DIR}/ThirdParty/${BUILD_OS_TYPE}/")
+    "${PROJECT_BINARY_DIR}/Prebuilt/${BUILD_OS_TYPE}/${CMAKE_BUILD_TYPE}/ThirdParty/")
 
 # Use C++20 to build all libraries.
 set(CMAKE_CXX_STANDARD          20)
@@ -58,12 +70,11 @@ endif()
 #------------------------------------------------------------------------------
 include(ExternalProject)
 
-set(STACKWALKER_LIB_NAME "StackWalker")
-
 #------------------------------------------------------------------------------
 # StackWalker
 #------------------------------------------------------------------------------
 # Maybe replace it with the stacktrace library in C++23?
+set(STACKWALKER_LIB_NAME "StackWalker")
 if(BUILD_OS_TYPE MATCHES "Windows")
     ExternalProject_Add(${STACKWALKER_LIB_NAME}
         # Directory option
@@ -78,6 +89,7 @@ if(BUILD_OS_TYPE MATCHES "Windows")
             -DCMAKE_CXX_STANDARD_REQUIRED:BOOL=ON
             -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
             -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+            -DStackWalker_DISABLE_TESTS:BOOL=OFF
 
         # Build option
         BUILD_ALWAYS ON
@@ -85,3 +97,24 @@ if(BUILD_OS_TYPE MATCHES "Windows")
         # Install option
         INSTALL_COMMAND ${CMAKE_COMMAND} --install <BINARY_DIR> --config $<CONFIG> --prefix <INSTALL_DIR>)
 endif()
+
+#------------------------------------------------------------------------------
+# stb
+#------------------------------------------------------------------------------
+set(STB_LIB_NAME "stb")
+ExternalProject_Add(${STB_LIB_NAME}
+    # Directory option
+    PREFIX      "${PROJECT_BINARY_DIR}/${STB_LIB_NAME}/"
+    SOURCE_DIR  "${PROJECT_SOURCE_DIR}/${STB_LIB_NAME}/"
+    BINARY_DIR  "${PROJECT_BINARY_DIR}/${STB_LIB_NAME}/"
+    INSTALL_DIR "${THIRD_PARTY_INSTALL_DIR}/${STB_LIB_NAME}/"
+    
+    # Configure option
+    CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+
+    # Build option
+    BUILD_ALWAYS ON
+    
+    # Install option
+    INSTALL_COMMAND ${CMAKE_COMMAND} --install <BINARY_DIR> --config $<CONFIG> --prefix <INSTALL_DIR>)
